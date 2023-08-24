@@ -1,0 +1,214 @@
+
+rm(list = ls())
+library(psych)
+library(patchwork)
+library(plyr)
+library(tidyverse)
+setwd("F:/7 Soil stability/320samples/First/alpha_rs")
+alpha <- read.csv("biodi_factor_alpha.csv",row.names = 1)
+alpha <- filter(alpha, factor %in% "C")
+alpha <- alpha[-1:-2,]
+alpha$rich <- 0
+names <- names(sort(rowSums(alpha[,c(8,15)]), decreasing = FALSE))
+
+
+### network windows 20 samples
+setwd("F:/7 Soil stability/320samples/Network")
+bio <- read.csv("network_parameter_20.csv",row.names = 1)
+data <- pivot_wider(bio, names_from = igraph,
+                    values_from = value)
+data$pos_ratio <- data$num.pos.edges/data$num.edges
+data$net_ratio <- data$num.neg.edges/data$num.edges
+
+standardizeUnitScale<-function(afun, min0=T, maxValue=max(afun, na.rm=T)){
+  if(min0 && min(afun, na.rm=T)<0) afun<-afun+abs(min(afun, na.rm=T))
+  afun/maxValue 
+}
+getStdAndMeanFunctions<-function(data, vars, standardizeFunction=standardizeUnitScale){
+  ret<-colwise(standardizeFunction)(data[,which(names(data) %in% vars)])
+  
+  names(ret)<-paste(names(ret), ".std", sep="")
+  ret$meanFunction<-rowSums(ret)/ncol(ret)
+  
+  return(ret)
+}
+colnames(data)
+data <- cbind(data,getStdAndMeanFunctions(data, vars = c("num.edges","connectance", "average.degree", "clustering.coefficient"  ))) 
+
+
+setwd("F:/Soil stability/320samples/richness_functions_lm")
+dat <- read.csv("richness_functions_lm.csv",row.names = 1)
+#dat <- cbind(dat, alpha_stable[,1:2]) %>% as.data.frame()
+#colnames(dat)[23:24] <- c("stable_rich","stable_shan")
+#dat <- select(dat,c(depth, Richness,stable_rich, T, N, M, ct_rs, cn_rs, cm_rs, commu_T, commu_N, commu_M))
+dat <- dat[names,]
+
+ac <- NULL
+for (i in 1:61) {
+  aa <- dat[i:c(i+19),14:22]
+  alp_t <- mean(aa$ct_rs)
+  alp_n <- mean(aa$cn_rs)
+  alp_m <- mean(aa$cm_rs)
+  com_t <- mean(aa$commu_T)
+  com_n <- mean(aa$commu_N)
+  com_m <- mean(aa$commu_M)
+  fun_t <- mean(aa$T)
+  fun_n <- mean(aa$N)
+  fun_m <- mean(aa$M)
+  ab <- cbind(alp_t, alp_n, alp_m, com_t, com_n, com_m, fun_t, fun_n, fun_m)
+  ac <- rbind(ac,ab)
+}
+
+data <- cbind(data, ac) %>% as.data.frame()
+data <- data[,c(1,2,18,23:32)]
+
+dat_alpha <- data[,c(1:4,5:7)]
+dat_commu <- data[,c(1:4,8:10)]
+dat_funct <- data[,c(1:4,11:13)]
+
+dat_alpha$mean <- rowSums(dat_alpha[,5:7])/3
+dat_commu$mean <- rowSums(dat_commu[,5:7])/3
+dat_funct$mean <- rowSums(dat_funct[,5:7])/3
+
+
+### network windows 30 samples
+setwd("F:/Soil stability/320samples/Network")
+bio2 <- read.csv("network_parameter_30.csv",row.names = 1)
+data2 <- pivot_wider(bio2, names_from = igraph,
+                    values_from = value)
+data2$pos_ratio <- data2$num.pos.edges/data2$num.edges
+data2$net_ratio <- data2$num.neg.edges/data2$num.edges
+
+standardizeUnitScale<-function(afun, min0=T, maxValue=max(afun, na.rm=T)){
+  if(min0 && min(afun, na.rm=T)<0) afun<-afun+abs(min(afun, na.rm=T))
+  afun/maxValue 
+}
+getStdAndMeanFunctions<-function(data, vars, standardizeFunction=standardizeUnitScale){
+  ret<-colwise(standardizeFunction)(data[,which(names(data) %in% vars)])
+  
+  names(ret)<-paste(names(ret), ".std", sep="")
+  ret$meanFunction<-rowSums(ret)/ncol(ret)
+  
+  return(ret)
+}
+colnames(data2)
+data2 <- cbind(data2,getStdAndMeanFunctions(data2, vars = c("num.edges","connectance", "average.degree", "clustering.coefficient"  ))) 
+
+
+setwd("F:/Soil stability/320samples/richness_functions_lm")
+dat2 <- read.csv("richness_functions_lm.csv",row.names = 1)
+#dat <- cbind(dat, alpha_stable[,1:2]) %>% as.data.frame()
+#colnames(dat)[23:24] <- c("stable_rich","stable_shan")
+#dat <- select(dat,c(depth, Richness,stable_rich, T, N, M, ct_rs, cn_rs, cm_rs, commu_T, commu_N, commu_M))
+dat2 <- dat2[names,]
+
+ac2 <- NULL
+for (i in 1:51) {
+  aa <- dat[i:c(i+29),14:22]
+  alp_t <- mean(aa$ct_rs)
+  alp_n <- mean(aa$cn_rs)
+  alp_m <- mean(aa$cm_rs)
+  com_t <- mean(aa$commu_T)
+  com_n <- mean(aa$commu_N)
+  com_m <- mean(aa$commu_M)
+  fun_t <- mean(aa$T)
+  fun_n <- mean(aa$N)
+  fun_m <- mean(aa$M)
+  ab <- cbind(alp_t, alp_n, alp_m, com_t, com_n, com_m, fun_t, fun_n, fun_m)
+  ac2 <- rbind(ac2,ab)
+}
+
+data2 <- cbind(data2, ac2) %>% as.data.frame()
+data2 <- data2[,c(1,2,18,23:32)]
+
+dat_alpha2 <- data2[,c(1:4,5:7)]
+dat_commu2 <- data2[,c(1:4,8:10)]
+dat_funct2 <- data2[,c(1:4,11:13)]
+
+dat_alpha2$mean <- rowSums(dat_alpha2[,5:7])/3
+dat_commu2$mean <- rowSums(dat_commu2[,5:7])/3
+dat_funct2$mean <- rowSums(dat_funct2[,5:7])/3
+
+
+
+
+
+### plot
+dat_alpha$windo <- "A"
+dat_commu$windo <- "A"
+dat_funct$windo <- "A"
+
+dat_alpha2$windo <- "B"
+dat_commu2$windo <- "B"
+dat_funct2$windo <- "B"
+
+dat_alpha3 <- rbind(dat_alpha, dat_alpha2) %>% as.data.frame()
+dat_commu3 <- rbind(dat_commu, dat_commu2) %>% as.data.frame()
+dat_funct3 <- rbind(dat_funct, dat_funct2) %>% as.data.frame()
+
+
+cols <- c("A" = "#84a98c", "B" = "#d4a373")
+plot_1 <- ggplot(dat_alpha3, aes(x = net_ratio, y = mean , color = windo))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  scale_color_manual(values = cols)+
+  theme_bw()+
+  theme( axis.text.x = element_text(colour = "black", size = 14), 
+         axis.text.y = element_text(colour = "black", size = 14), 
+         axis.title= element_text( size = 18, colour = "black"))
+plot_1
+
+plot_2 <- ggplot(dat_commu3, aes(x = net_ratio, y = mean,color = windo))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  scale_color_manual(values = cols)+
+  theme_bw()+
+  theme( axis.text.x = element_text(colour = "black", size = 14), 
+         axis.text.y = element_text(colour = "black", size = 14), 
+         axis.title= element_text( size = 18, colour = "black"))
+plot_2
+
+plot_3 <- ggplot(dat_funct3, aes(x = net_ratio, y = mean,color = windo))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  scale_color_manual(values = cols)+
+  theme_bw()+
+  theme( axis.text.x = element_text(colour = "black", size = 14), 
+         axis.text.y = element_text(colour = "black", size = 14), 
+         axis.title= element_text( size = 18, colour = "black"))
+plot_3
+
+
+plot_4 <- ggplot(dat_alpha3, aes(x = meanFunction, y = mean,color = windo))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  scale_color_manual(values = cols)+
+  theme_bw()+
+  theme( axis.text.x = element_text(colour = "black", size = 14), 
+         axis.text.y = element_text(colour = "black", size = 14), 
+         axis.title= element_text( size = 18, colour = "black"))
+plot_4
+
+plot_5 <- ggplot(dat_commu3, aes(x = meanFunction, y = mean,color = windo))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  scale_color_manual(values = cols)+
+  theme_bw()+
+  theme( axis.text.x = element_text(colour = "black", size = 14), 
+         axis.text.y = element_text(colour = "black", size = 14), 
+         axis.title= element_text( size = 18, colour = "black"))
+plot_5
+
+plot_6 <- ggplot(dat_funct3, aes(x = meanFunction, y = mean,color = windo))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  scale_color_manual(values = cols)+
+  theme_bw()+
+  theme( axis.text.x = element_text(colour = "black", size = 14), 
+         axis.text.y = element_text(colour = "black", size = 14), 
+         axis.title= element_text( size = 18, colour = "black"))
+plot_6
+
+plot <- (plot_1 + plot_2 + plot_3)/(plot_4 + plot_5 + plot_6)
+plot
+ggsave(plot, filename = "network_rs2.pdf",width = 15, height = 8)
