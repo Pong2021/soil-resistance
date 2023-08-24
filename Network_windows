@@ -1,0 +1,176 @@
+
+#### 
+rm(list = ls())
+library(Hmisc)
+library(tidyverse)
+library(igraph)
+library(vegan)
+setwd("F:/7 Soil stability/320samples")
+sam <- read.csv("sample_change.csv",row.names = 1)
+sam_c <- filter(sam, factor %in% "C")
+bac <- read.csv("asv_bacteria2.csv",row.names = 1)
+fun <- read.csv("asv_fungi2.csv",row.names = 1)
+pro <- read.csv("asv_protist2.csv",row.names = 1)
+colSums(bac)[1];colSums(fun)[1];colSums(pro)[1]
+
+rownames(bac) <- paste("bac",rownames(bac),sep = "_")
+rownames(fun) <- paste("fun",rownames(fun),sep = "_")
+rownames(pro) <- paste("pro",rownames(pro),sep = "_")
+
+bac <- bac[,rownames(sam_c)]
+fun <- fun[,rownames(sam_c)]
+pro <- pro[,rownames(sam_c)]
+
+names <- names(sort(rowSums(bac), decreasing = TRUE))
+bac_sort <- bac[names[1:2426],]
+rowSums(bac_sort)[1:50]
+bac_sort2 <- bac_sort[rowSums(bac_sort>0)>=20,]
+
+names <- names(sort(rowSums(fun), decreasing = TRUE))
+fun_sort <- fun[names[1:744],]
+rowSums(fun_sort)[1:50]
+fun_sort2 <- fun_sort[rowSums(fun_sort>0)>=20,]
+
+names <- names(sort(rowSums(pro), decreasing = TRUE))
+pro_sort <- pro[names[1:2638],]
+rowSums(pro_sort)[1:50]
+pro_sort2 <- pro_sort[rowSums(pro_sort>0)>=20,]
+
+biodiv <- rbind(bac_sort2, fun_sort2,pro_sort2)
+rich <- specnumber(t(biodiv)) %>% as.data.frame()
+
+setwd("F:/Soil stability/320samples/First/alpha_rs")
+alpha <- read.csv("biodi_factor_alpha.csv",row.names = 1)
+alpha <- filter(alpha, factor %in% "C")
+alpha <- cbind(alpha, rich)
+colnames(alpha)[15] <- "network.richness"
+summary(lm(Richness ~ network.richness, data = alpha))
+alpha$rich <- 0
+names <- names(sort(rowSums(alpha[,c(8,15)]), decreasing = FALSE))
+biodiv <- biodiv[,names]
+biodiv <- t(biodiv) %>% as.data.frame()
+
+
+#### windows 20 samples
+bio <- NULL
+for (i in 1:61) {
+  bb <- biodiv[i:c(i+19),]
+  bb <- bb[,colSums(bb)>0]
+  bb <- as.matrix(bb)
+  
+  occor <-rcorr(bb,type="spearman")  
+  occor.r = occor$r 
+  occor.p = occor$P 
+  occor.r[abs(occor.r)<0.65]<-0
+  occor.p<-p.adjust(occor.p,method="BH")  
+  occor.p[occor.p>=0.001]<-0  
+  occor.p[occor.p<0.001]<-1 
+  
+  igraph = graph_from_adjacency_matrix(occor.r,mode="undirected",weighted=TRUE,diag=FALSE)
+  bad.vs = V(igraph)[degree(igraph) == 0]
+  igraph = delete.vertices(igraph, bad.vs)
+  
+  igraph.correlation = E(igraph)$weight
+  igraph.correlation <- as.data.frame(igraph.correlation)
+  igraph.weight = abs(E(igraph)$weight)
+  E(igraph)$weight <- abs(E(igraph)$weight)
+  
+  num.edges <- length(E(igraph)) # length(curve_multiple(igraph))
+  num.vertices <- length(V(igraph))# length(diversity(igraph, weights = NULL, vids = 	V(igraph)))
+  connectance <- edge_density(igraph,loops=FALSE)
+  average.degree <- mean(degree(igraph))
+  average.path.length <- average.path.length(igraph) 
+  edge.connectivity <- edge_connectivity(igraph)
+  clustering.coefficient <- transitivity(igraph) 
+  diameter <- diameter(igraph)
+  no.clusters <- no.clusters(igraph)
+  centralization.degree <- centralization.degree(igraph)$centralization
+  centralization.betweenness <- centralization.betweenness(igraph)$centralization 
+  centralization.closeness <- centralization.closeness(igraph)$centralization
+  num.pos.edges<-length(which(igraph.correlation$igraph.correlation>0))# number of positive correlation
+  num.neg.edges<-length(which(igraph.correlation$igraph.correlation<0))# number of negative correlation
+  a<-c("num.edges","num.pos.edges","num.neg.edges","num.vertices","connectance","average.degree","average.path.length","edge.connectivity",
+       "clustering.coefficient","no.clusters","centralization.degree","centralization.betweenness","centralization.closeness","diameter")
+  b <- c(num.edges,num.pos.edges,num.neg.edges,num.vertices,connectance,average.degree,average.path.length,edge.connectivity,clustering.coefficient,
+         no.clusters,centralization.degree,centralization.betweenness,centralization.closeness,diameter )
+  igraph.network.pro <- data.frame(a,b)
+  bio <- rbind(bio, igraph.network.pro)
+}
+bio$names <- rep(1:61, each = 14)
+
+alpha <- alpha[names,]
+alp <- NULL
+for (i in 1:61) {
+  cc <- alpha[i:c(i+19),]
+  cc <- mean(cc$Richness)
+  alp <- rbind(alp,cc)
+}
+alp <- as.vector(alp)
+alp
+
+bio$richness <- rep(alp, each =14)
+colnames(bio)[1:2] <- c("igraph","value")
+write.csv(bio,file = "network_parameter_20.csv")
+
+
+
+#### windows 30 samples
+bio <- NULL
+for (i in 1:51) {
+  bb <- biodiv[i:c(i+29),]
+  bb <- bb[,colSums(bb)>0]
+  bb <- as.matrix(bb)
+  
+  occor <-rcorr(bb,type="spearman") 
+  occor.r = occor$r
+  occor.p = occor$P 
+  occor.r[abs(occor.r)<0.65]<-0
+  occor.p<-p.adjust(occor.p,method="BH") 
+  occor.p[occor.p>=0.001]<-0  
+  occor.p[occor.p<0.001]<-1 
+  
+  igraph = graph_from_adjacency_matrix(occor.r,mode="undirected",weighted=TRUE,diag=FALSE)
+  bad.vs = V(igraph)[degree(igraph) == 0]
+  igraph = delete.vertices(igraph, bad.vs)
+  
+  igraph.correlation = E(igraph)$weight
+  igraph.correlation <- as.data.frame(igraph.correlation)
+  igraph.weight = abs(E(igraph)$weight)
+  E(igraph)$weight <- abs(E(igraph)$weight)
+  
+  num.edges <- length(E(igraph)) # length(curve_multiple(igraph))
+  num.vertices <- length(V(igraph))# length(diversity(igraph, weights = NULL, vids = 	V(igraph)))
+  connectance <- edge_density(igraph,loops=FALSE)
+  average.degree <- mean(degree(igraph))
+  average.path.length <- average.path.length(igraph) 
+  edge.connectivity <- edge_connectivity(igraph)
+  clustering.coefficient <- transitivity(igraph)
+  diameter <- diameter(igraph)
+  no.clusters <- no.clusters(igraph)
+  centralization.degree <- centralization.degree(igraph)$centralization
+  centralization.betweenness <- centralization.betweenness(igraph)$centralization 
+  centralization.closeness <- centralization.closeness(igraph)$centralization
+  num.pos.edges<-length(which(igraph.correlation$igraph.correlation>0))# number of positive correlation
+  num.neg.edges<-length(which(igraph.correlation$igraph.correlation<0))# number of negative correlation
+  a<-c("num.edges","num.pos.edges","num.neg.edges","num.vertices","connectance","average.degree","average.path.length","edge.connectivity",
+       "clustering.coefficient","no.clusters","centralization.degree","centralization.betweenness","centralization.closeness","diameter")
+  b <- c(num.edges,num.pos.edges,num.neg.edges,num.vertices,connectance,average.degree,average.path.length,edge.connectivity,clustering.coefficient,
+         no.clusters,centralization.degree,centralization.betweenness,centralization.closeness,diameter )
+  igraph.network.pro <- data.frame(a,b)
+  bio <- rbind(bio, igraph.network.pro)
+}
+bio$names <- rep(1:51, each = 14)
+
+alpha <- alpha[names,]
+alp <- NULL
+for (i in 1:51) {
+  cc <- alpha[i:c(i+29),]
+  cc <- mean(cc$Richness)
+  alp <- rbind(alp,cc)
+}
+alp <- as.vector(alp)
+alp
+
+bio$richness <- rep(alp, each =14)
+colnames(bio)[1:2] <- c("igraph","value")
+write.csv(bio,file = "network_parameter_30.csv")
