@@ -1,22 +1,21 @@
 
-#### 1. biodiversity
+#### 1. diversity resistance
 rm(list = ls())
 library(vegan)
 library(hrbrthemes)
 library(viridis)
-setwd("F:/7 Soil stability/320samples")
+
+## 1.1 input data
 bac <- read.csv("asv_bacteria2.csv",row.names = 1)
 fun <- read.csv("asv_fungi2.csv",row.names = 1)
 pro <- read.csv("asv_protist2.csv",row.names = 1)
-colSums(bac)[1];colSums(fun)[1];colSums(pro)[1]
-
 rownames(bac) <- paste("bac",rownames(bac),sep = "_")
 rownames(fun) <- paste("fun",rownames(fun),sep = "_")
 rownames(pro) <- paste("pro",rownames(pro),sep = "_")
 biodiv <- rbind(bac, fun,pro)
 sam <- read.csv("sample_change.csv",row.names = 1)
 
-
+## 1.2 calculate species richness
 asv_t <- t(biodiv) %>% as.data.frame()
 alpha <- function(x, tree = NULL, base = exp(1)) { #exp(1)
   est <- estimateR(x)
@@ -38,9 +37,9 @@ alpha <- function(x, tree = NULL, base = exp(1)) { #exp(1)
 }
 #tree <- read.tree('OTUs-ba.tre')
 alpha_all <- alpha(asv_t) 
-
 sam_alp <- cbind(sam, alpha_all)
 
+## 1.3 plot richness in the top- and subsoils (Fig. 2a)
 sam_c <- filter(sam_alp, factor %in% "C")
 sam_c$depth <- factor(sam_c$depth, levels = c("U", "D"))
 plot <- ggplot(sam_c , aes(x = depth,y = Richness,fill = depth))+
@@ -63,10 +62,10 @@ plot <- ggplot(sam_c , aes(x = depth,y = Richness,fill = depth))+
          axis.text.y = element_text(colour = "black", size = 14), 
          axis.title= element_text( size = 18, colour = "black"))
 plot
-ggsave(plot, filename = "Control_depth_richness.pdf", width = 4, height = 4.5)
 
 
-## Topsoil
+
+## 1.4 calculate topsoil diversity resistance
 sam_alp_top <- filter(sam_alp,depth %in% "U")
 alp_top_c <- filter(sam_alp_top,factor %in% "C")
 alp_top_t <- filter(sam_alp_top,factor %in% "T")
@@ -81,12 +80,18 @@ top_ric$names <- rownames(alp_top_c)
 top_ric$Longitude <- alp_top_c$Longitude
 top_ric$Latitude <- alp_top_c$Latitude
 rownames(top_ric) <- top_ric$names
-#factor <- filter(factor,depth %in% "U",factor %in% "C")
-#up_richness <- up_richness[factor$names,]
-write.csv(top_ric,file = "biodi_top_richness_change.csv")
+
+top_richness <- cbind(top_ric, alp_top_c$Richness)
+colnames(top_richness)[7] <- "Richness"
+ct_rs <- 1-(2*abs(top_richness$ct))/(abs(top_richness$ct) + top_richness$Richness) 
+cn_rs <- 1-(2*abs(top_richness$cn))/(abs(top_richness$cn) + top_richness$Richness) 
+cm_rs <- 1-(2*abs(top_richness$cm))/(abs(top_richness$cm) + top_richness$Richness) 
+top_richness <- cbind(top_richness, ct_rs, cn_rs, cm_rs)
+write.csv(top_richness,file = "biodi_top_richness_rs.csv")
 
 
-## Subsoil
+
+## 1.5  calculate subsoil diversity resistance
 sam_alp_sub <- filter(sam_alp,depth %in% "D")
 alp_sub_c <- filter(sam_alp_sub,factor %in% "C")
 alp_sub_t <- filter(sam_alp_sub,factor %in% "T")
@@ -101,53 +106,29 @@ sub_ric$names <- rownames(alp_sub_c)
 sub_ric$Longitude <- alp_sub_c$Longitude
 sub_ric$Latitude <- alp_sub_c$Latitude
 rownames(sub_ric) <- sub_ric$names
-#factor <- filter(factor,depth %in% "U",factor %in% "C")
-#up_richness <- up_richness[factor$names,]
-write.csv(sub_ric,file = "biodi_sub_richness_change.csv")
 
-
-### Topsoil RS
-top_richness <- cbind(top_ric, alp_top_c$Richness)
-colnames(top_richness)[7] <- "Richness"
-ct_rs <- 1-(2*abs(top_richness$ct))/(abs(top_richness$ct) + top_richness$Richness) 
-cn_rs <- 1-(2*abs(top_richness$cn))/(abs(top_richness$cn) + top_richness$Richness) 
-cm_rs <- 1-(2*abs(top_richness$cm))/(abs(top_richness$cm) + top_richness$Richness) 
-
-top_richness <- cbind(top_richness, ct_rs, cn_rs, cm_rs)
-write.csv(top_richness,file = "biodi_top_richness_rs.csv")
-
-
-### Subsoil RS
 sub_richness <- cbind(sub_ric, alp_sub_c$Richness)
 colnames(sub_richness)[7] <- "Richness"
 ct_rs <- 1-(2*abs(sub_richness$ct))/(abs(sub_richness$ct) + sub_richness$Richness) 
 cn_rs <- 1-(2*abs(sub_richness$cn))/(abs(sub_richness$cn) + sub_richness$Richness) 
 cm_rs <- 1-(2*abs(sub_richness$cm))/(abs(sub_richness$cm) + sub_richness$Richness) 
-
 sub_richness <- cbind(sub_richness, ct_rs, cn_rs, cm_rs)
 write.csv(sub_richness,file = "biodi_sub_richness_rs.csv")
 write.csv(sam_alp,file = "biodi_factor_alpha.csv")
 
 
 
-## barplot 1
-rm(list = ls())
-setwd("F:/Soil stability/320samples/alpha_rs")
+## 1.6 plot topsoil and subsoil diversity resistance 1
 up_rs <- read.csv("biodi_top_richness_rs.csv",row.names = 1)
 do_rs <- read.csv("biodi_sub_richness_rs.csv",row.names = 1)
 
-
 top_t <- data.frame(depth = "T",mean = mean(up_rs$ct_rs) ,se = std.error(up_rs$ct_rs))
 sub_t <- data.frame(depth = "S",mean = mean(do_rs$ct_rs) ,se = std.error(do_rs$ct_rs))
-
 top_n <- data.frame(depth = "T",mean = mean(up_rs$cn_rs) ,se = std.error(up_rs$cn_rs))
 sub_n <- data.frame(depth = "S",mean = mean(do_rs$cn_rs) ,se = std.error(do_rs$cn_rs))
-
 top_m <- data.frame(depth = "T",mean = mean(up_rs$cm_rs) ,se = std.error(up_rs$cm_rs))
 sub_m <- data.frame(depth = "S",mean = mean(do_rs$cm_rs) ,se = std.error(do_rs$cm_rs))
-
 tnm <- rbind(top_t, sub_t, top_n, sub_n, top_m, sub_m)
-
 tnm$factor <- rep(c("T","N","M"),each = 2)
 #cols <- c("S" = "#000000", "T" =  "#999999")
 #colnames(tnm)[1] <- "depth"
@@ -167,32 +148,22 @@ plot <- ggplot(tnm, aes(x = factor,y = mean,fill = depth))+
          axis.text.y = element_text(colour = "black", size = 14), 
          axis.title= element_text( size = 18, colour = "black"))
 plot
-ggsave(plot,filename = "biodi_alpha_rs.pdf",width = 5,height = 4)
 
 
-
-### barplot 2
-rm(list = ls())
+##  1.7 plot topsoil and subsoil diversity resistance 2
 up <- read.csv("biodi_top_richness_rs.csv",row.names = 1)
 do <- read.csv("biodi_sub_richness_rs.csv",row.names = 1)
-
 up <- up[,8:10]
 do <- do[,8:10]
-
-
 colnames(up) <- c("T","N","M")
 colnames(do) <- c("T","N","M")
-
 up <- gather(up, key = "factor",value = "similarity")
 do <- gather(do, key = "factor",value = "similarity")
-
 data <- data.frame(name = c("-0.2-0","-0.2-0","0-0.2","0-0.2",
                             "0.2-0.4","0.2-0.4","0.4-0.6","0.4-0.6",
                             "0.6-0.8","0.6-0.8","0.8-1","0.8-1"),
                    depth = rep(c("topsoil","subsoil"),times = 6),
                    value = c(0, 4, 0, 14, 1, 58, 7, 31, 26, 8, 86, 5))
-
-
 #cols <- c("subsoil" = "#000000", "topsoil" =  "#999999")
 data$depth <- factor(data$depth,levels = c("topsoil","subsoil"))
 plot <- ggplot(data,aes(x = name, y = value/120,fill = depth))+
@@ -211,5 +182,3 @@ plot <- ggplot(data,aes(x = name, y = value/120,fill = depth))+
   ggtitle("")
 #scale_x_discrete(breaks = c("0.1","0.2","0.3","0.4","0.5","0.6","0.7","0.8"))
 plot
-ggsave(plot,filename = "biodi_alpha_rs2.pdf",width = 5,height = 4)
-
