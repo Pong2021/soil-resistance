@@ -1,19 +1,18 @@
 
-rm(list = ls())
+#### 1. Linking soil network to ecological resistance
 library(psych)
 library(patchwork)
 library(plyr)
 library(tidyverse)
-setwd("F:/7 Soil stability/320samples/First/alpha_rs")
-alpha <- read.csv("biodi_factor_alpha.csv",row.names = 1)
+
+## 1.1 input data
+alpha <- read.csv("biodi_factor_alpha.csv",row.names = 1) # file from 'Diversity resistance'
 alpha <- filter(alpha, factor %in% "C")
 alpha <- alpha[-1:-2,]
 alpha$rich <- 0
 names <- names(sort(rowSums(alpha[,c(8,15)]), decreasing = FALSE))
 
-
-### network windows 20 samples
-setwd("F:/7 Soil stability/320samples/Network")
+## 1.2 calculate network complexity and negative associations across a windows of 20 samples
 bio <- read.csv("network_parameter_20.csv",row.names = 1)
 data <- pivot_wider(bio, names_from = igraph,
                     values_from = value)
@@ -36,7 +35,6 @@ colnames(data)
 data <- cbind(data,getStdAndMeanFunctions(data, vars = c("num.edges","connectance", "average.degree", "clustering.coefficient"  ))) 
 
 
-setwd("F:/Soil stability/320samples/richness_functions_lm")
 dat <- read.csv("richness_functions_lm.csv",row.names = 1)
 #dat <- cbind(dat, alpha_stable[,1:2]) %>% as.data.frame()
 #colnames(dat)[23:24] <- c("stable_rich","stable_shan")
@@ -71,8 +69,7 @@ dat_commu$mean <- rowSums(dat_commu[,5:7])/3
 dat_funct$mean <- rowSums(dat_funct[,5:7])/3
 
 
-### network windows 30 samples
-setwd("F:/Soil stability/320samples/Network")
+## 1.3 calculate network complexity and negative associations across a windows of 30 samples
 bio2 <- read.csv("network_parameter_30.csv",row.names = 1)
 data2 <- pivot_wider(bio2, names_from = igraph,
                     values_from = value)
@@ -94,8 +91,6 @@ getStdAndMeanFunctions<-function(data, vars, standardizeFunction=standardizeUnit
 colnames(data2)
 data2 <- cbind(data2,getStdAndMeanFunctions(data2, vars = c("num.edges","connectance", "average.degree", "clustering.coefficient"  ))) 
 
-
-setwd("F:/Soil stability/320samples/richness_functions_lm")
 dat2 <- read.csv("richness_functions_lm.csv",row.names = 1)
 #dat <- cbind(dat, alpha_stable[,1:2]) %>% as.data.frame()
 #colnames(dat)[23:24] <- c("stable_rich","stable_shan")
@@ -120,32 +115,24 @@ for (i in 1:51) {
 
 data2 <- cbind(data2, ac2) %>% as.data.frame()
 data2 <- data2[,c(1,2,18,23:32)]
-
 dat_alpha2 <- data2[,c(1:4,5:7)]
 dat_commu2 <- data2[,c(1:4,8:10)]
 dat_funct2 <- data2[,c(1:4,11:13)]
-
 dat_alpha2$mean <- rowSums(dat_alpha2[,5:7])/3
 dat_commu2$mean <- rowSums(dat_commu2[,5:7])/3
 dat_funct2$mean <- rowSums(dat_funct2[,5:7])/3
 
 
-
-
-
-### plot
+## 1.4 plot the relationships between network complexity, negative associations and resistance of diversity, community and function.
 dat_alpha$windo <- "A"
 dat_commu$windo <- "A"
 dat_funct$windo <- "A"
-
 dat_alpha2$windo <- "B"
 dat_commu2$windo <- "B"
 dat_funct2$windo <- "B"
-
 dat_alpha3 <- rbind(dat_alpha, dat_alpha2) %>% as.data.frame()
 dat_commu3 <- rbind(dat_commu, dat_commu2) %>% as.data.frame()
 dat_funct3 <- rbind(dat_funct, dat_funct2) %>% as.data.frame()
-
 
 cols <- c("A" = "#84a98c", "B" = "#d4a373")
 plot_1 <- ggplot(dat_alpha3, aes(x = net_ratio, y = mean , color = windo))+
@@ -211,4 +198,3 @@ plot_6
 
 plot <- (plot_1 + plot_2 + plot_3)/(plot_4 + plot_5 + plot_6)
 plot
-ggsave(plot, filename = "network_rs2.pdf",width = 15, height = 8)
