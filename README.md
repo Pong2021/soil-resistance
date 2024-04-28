@@ -13,3 +13,9 @@ Code named 'Linking soil network ro ecological resistance': how the relationship
 
 # Data
 Data named 'asv_bacteria2': bacterial ASV table, rownames is ASV name, colname is sample name 
+
+Data named 'asv_fungi2': Fungal ASV table, rownames is ASV name, colname is sample name 
+
+Data named 'asv_protist2': protistan ASV table, rownames is ASV name, colname is sample name 
+
+Data named 'sample change': factor file
