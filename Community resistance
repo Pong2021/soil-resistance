@@ -1,25 +1,23 @@
 
-#### Community resistance
-rm(list = ls())
+#### 1. Community resistance
 library(tidyverse)
 library(vegan)
+
+## 1. input data
 bac <- read.csv("asv_bacteria2.csv",row.names = 1)
 fun <- read.csv("asv_fungi2.csv",row.names = 1)
 pro <- read.csv("asv_protist2.csv",row.names = 1)
-colSums(bac)[1];colSums(fun)[1];colSums(pro)[1]
-
 rownames(bac) <- paste("bac",rownames(bac),sep = "_")
 rownames(fun) <- paste("fun",rownames(fun),sep = "_")
 rownames(pro) <- paste("pro",rownames(pro),sep = "_")
 biodiv <- rbind(bac, fun,pro)
 sam <- read.csv("sample_change.csv",row.names = 1)
-
 asv <- as.data.frame(t(biodiv))
 sam_asv <- cbind(sam, asv) %>% as.data.frame()
-
 up_ct <- filter(sam_asv,depth %in% "U",factor %in% c("C","M")) # depth %in% "U", factor %in% c("C","T"),factor %in% c("C","N")
 asv_ct <- select(up_ct,c(-1:-7))
 
+## 1.2 calculate bray-curtis distance
 up_1 <- vegdist(asv_ct[1:2,],method = "bray");up_2 <- vegdist(asv_ct[3:4,],method = "bray");up_3 <- vegdist(asv_ct[5:6,],method = "bray");up_4 <- vegdist(asv_ct[7:8,],method = "bray")
 up_5 <- vegdist(asv_ct[9:10,],method = "bray");up_6 <- vegdist(asv_ct[11:12,],method = "bray");up_7 <- vegdist(asv_ct[13:14,],method = "bray");up_8 <- vegdist(asv_ct[15:16,],method = "bray")
 up_9 <- vegdist(asv_ct[17:18,],method = "bray");up_10 <- vegdist(asv_ct[19:20,],method = "bray");up_11 <- vegdist(asv_ct[21:22,],method = "bray");up_12 <- vegdist(asv_ct[23:24,],method = "bray")
@@ -78,31 +76,21 @@ do_sim <- 1- do_simi
 write.csv(do_sim,file = "biodi_sub_simi_local.csv")
 
 
-
-## barplot 1
-rm(list = ls())
+## 1.3 plot community resistance 1
 library(plotrix)
 up <- read.csv("biodi_top_simi_local.csv",row.names = 1)
 do <- read.csv("biodi_sub_simi_local.csv",row.names = 1)
-
 colnames(up) <- c("T","N","M")
 colnames(do) <- c("T","N","M")
-
 data <- rbind(up,do)
 data$depth <- rep(c("U","D"),each=40)
-
 top_t <- data.frame(depth = "T",mean = mean(up$T) ,se = std.error(up$T))
 sub_t <- data.frame(depth = "S",mean = mean(do$T) ,se = std.error(do$T))
-
 top_n <- data.frame(depth = "T",mean = mean(up$N) ,se = std.error(up$N))
 sub_n <- data.frame(depth = "S",mean = mean(do$N) ,se = std.error(do$N))
-
 top_m <- data.frame(depth = "T",mean = mean(up$M) ,se = std.error(up$M))
 sub_m <- data.frame(depth = "S",mean = mean(do$M) ,se = std.error(do$M))
-
 tnm <- rbind(top_t, sub_t, top_n, sub_n, top_m, sub_m)
-
-
 #tnm <- rbind(t,n,m)
 tnm$factor <- rep(c("T","N","M"),each = 2)
 #cols <- c("S" = "#000000", "T" =  "#999999")
@@ -124,4 +112,47 @@ plot <- ggplot(tnm, aes(x = factor,y = mean,fill = depth))+
          axis.text.y = element_text(colour = "black", size = 14), 
          axis.title= element_text( size = 18, colour = "black"))
 plot
-ggsave(plot,filename = "biodi_community_rs.pdf",width = 5,height = 4)
+
+## 1.4 plot community resistance 2
+up <- read.csv("biodi_top_simi_local.csv",row.names = 1)
+do <- read.csv("biodi_sub_simi_local.csv",row.names = 1)
+colnames(up) <- c("T","N","M")
+colnames(do) <- c("T","N","M")
+up <- gather(up, key = "factor",value = "similarity")
+do <- gather(do, key = "factor",value = "similarity")
+
+length(up[up>0 & up<0.1])
+length(do[do>0 & do<0.1])
+length(up[up>0.1 & up<0.2])
+length(do[do>0.1 & do<0.2]) # 1
+length(up[up>0.2 & up<0.3]) # 0
+length(do[do>0.2 & do<0.3]) # 4
+length(up[up>0.3 & up<0.4]) # 9
+length(do[do>0.3 & do<0.4]) # 16
+length(up[up>0.4 & up<0.5]) # 62
+length(do[do>0.4 & do<0.5]) # 85
+length(up[up>0.5 & up<0.6]) # 49
+length(do[do>0.5 & do<0.6]) # 14
+data <- data.frame(name = c("0.1-0.2","0.1-0.2","0.2-0.3","0.2-0.3",
+                            "0.3-0.4","0.3-0.4","0.4-0.5","0.4-0.5",
+                            "0.5-0.6","0.5-0.6"),
+                   depth = rep(c("topsoil","subsoil"),times = 5),
+                   value = c(0, 1, 0, 4, 9, 16, 62, 85, 49, 14))
+#cols <- c("subsoil" = "#000000", "topsoil" =  "#999999")
+data$depth <- factor(data$depth,levels = c("topsoil","subsoil"))
+plot <- ggplot(data,aes(x = name, y = value/120,fill = depth))+
+  geom_bar(stat = "identity",position = "dodge",width = 0.6)+
+  #scale_fill_manual(values = cols)+
+  scale_y_continuous(expand = c(0,0),
+                     breaks = c(0,0.2,0.4,0.6,0.8),
+                     limits = c(0,0.8))+
+  labs(x = "Community resistance index", y = "Frequency")+
+  theme_bw()+
+  theme( axis.text.x = element_text(colour = "black", size = 14), 
+         axis.text.y = element_text(colour = "black", size = 14), 
+         axis.title= element_text( size = 18, colour = "black"))+
+  #geom_hline(aes(yintercept=1), colour="red", linetype="dashed",size = 1)+
+  #geom_hline(aes(yintercept= 2),  colour="black", linetype="dashed",size = 1)
+  ggtitle("")
+#scale_x_discrete(breaks = c("0.1","0.2","0.3","0.4","0.5","0.6","0.7","0.8"))
+plot
