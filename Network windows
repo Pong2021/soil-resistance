@@ -1,22 +1,19 @@
 
-#### 
-rm(list = ls())
+#### 1. Network windows
 library(Hmisc)
 library(tidyverse)
 library(igraph)
 library(vegan)
-setwd("F:/7 Soil stability/320samples")
+
+## 1.1 input data
 sam <- read.csv("sample_change.csv",row.names = 1)
 sam_c <- filter(sam, factor %in% "C")
 bac <- read.csv("asv_bacteria2.csv",row.names = 1)
 fun <- read.csv("asv_fungi2.csv",row.names = 1)
 pro <- read.csv("asv_protist2.csv",row.names = 1)
-colSums(bac)[1];colSums(fun)[1];colSums(pro)[1]
-
 rownames(bac) <- paste("bac",rownames(bac),sep = "_")
 rownames(fun) <- paste("fun",rownames(fun),sep = "_")
 rownames(pro) <- paste("pro",rownames(pro),sep = "_")
-
 bac <- bac[,rownames(sam_c)]
 fun <- fun[,rownames(sam_c)]
 pro <- pro[,rownames(sam_c)]
@@ -39,7 +36,6 @@ pro_sort2 <- pro_sort[rowSums(pro_sort>0)>=20,]
 biodiv <- rbind(bac_sort2, fun_sort2,pro_sort2)
 rich <- specnumber(t(biodiv)) %>% as.data.frame()
 
-setwd("F:/Soil stability/320samples/First/alpha_rs")
 alpha <- read.csv("biodi_factor_alpha.csv",row.names = 1)
 alpha <- filter(alpha, factor %in% "C")
 alpha <- cbind(alpha, rich)
@@ -51,7 +47,7 @@ biodiv <- biodiv[,names]
 biodiv <- t(biodiv) %>% as.data.frame()
 
 
-#### windows 20 samples
+## 1.2 calculate network parameters across a window of 20 samples
 bio <- NULL
 for (i in 1:61) {
   bb <- biodiv[i:c(i+19),]
@@ -106,15 +102,13 @@ for (i in 1:61) {
   alp <- rbind(alp,cc)
 }
 alp <- as.vector(alp)
-alp
 
 bio$richness <- rep(alp, each =14)
 colnames(bio)[1:2] <- c("igraph","value")
 write.csv(bio,file = "network_parameter_20.csv")
 
 
-
-#### windows 30 samples
+## 1.3 calculate network parameters across a window of 30 samples
 bio <- NULL
 for (i in 1:51) {
   bb <- biodiv[i:c(i+29),]
@@ -169,8 +163,6 @@ for (i in 1:51) {
   alp <- rbind(alp,cc)
 }
 alp <- as.vector(alp)
-alp
-
 bio$richness <- rep(alp, each =14)
 colnames(bio)[1:2] <- c("igraph","value")
 write.csv(bio,file = "network_parameter_30.csv")
