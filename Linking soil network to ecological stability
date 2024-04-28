@@ -13,7 +13,7 @@ alpha$rich <- 0
 names <- names(sort(rowSums(alpha[,c(8,15)]), decreasing = FALSE))
 
 ## 1.2 calculate network complexity and negative associations across a windows of 20 samples
-bio <- read.csv("network_parameter_20.csv",row.names = 1)
+bio <- read.csv("network_parameter_20.csv",row.names = 1)  # file from 'Network windows'
 data <- pivot_wider(bio, names_from = igraph,
                     values_from = value)
 data$pos_ratio <- data$num.pos.edges/data$num.edges
@@ -70,7 +70,7 @@ dat_funct$mean <- rowSums(dat_funct[,5:7])/3
 
 
 ## 1.3 calculate network complexity and negative associations across a windows of 30 samples
-bio2 <- read.csv("network_parameter_30.csv",row.names = 1)
+bio2 <- read.csv("network_parameter_30.csv",row.names = 1)  # file from 'Network windows'
 data2 <- pivot_wider(bio2, names_from = igraph,
                     values_from = value)
 data2$pos_ratio <- data2$num.pos.edges/data2$num.edges
