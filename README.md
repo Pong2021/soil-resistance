@@ -1,11 +1,13 @@
-# soil-stability
+# soil-resistance
 Agricultural subsoils are less resistant to global change
 
 
-Biodiversity resistance：how the resistance index of biodiversity is calculated
+Code named 'Diversity resistance'：how the resistance index of species diversity is calculated
 
 
-Community resistance：how the resistance index of community structure is calculated
+Code named 'Community resistance'：how the resistance index of community structure is calculated
 
 
-Network windows: how to generate networks by moving-window approach
+Code named 'Network windows': how to generate networks by moving-window approach across 20 and 30 samples
+
+Code named 'Linking soil network ro ecological resistance': how the relationships between network complexity, negative associations and the resistance of diversity, community, and function
