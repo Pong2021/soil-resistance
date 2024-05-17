@@ -1,0 +1,176 @@
+library(ggplot2)
+library(dplyr)
+library(plyr)
+library(tidyr)
+library(multifunc)
+
+#### 1.  input soil functions data
+soil <- read.csv("soils.csv",row.names = 1)
+
+#### 2. calculate each function resistance in the topsoil
+up <- filter(soil,depth %in% "U")
+up_c <- filter(up,factor %in% "C")
+up_t <- filter(up,factor %in% "T")
+up_n <- filter(up,factor %in% "N")
+up_m <- filter(up,factor %in% "M")
+
+ct <- up_t[,5:15]-up_c[,5:15]
+cn <- up_n[,5:15]-up_c[,5:15]
+cm <- up_m[,5:15]-up_c[,5:15]
+
+ct_no3 <- 1-(2*abs(ct$NO3))/(abs(ct$NO3) + up_c$NO3)
+ct_nh4 <- 1-(2*abs(ct$NH4))/(abs(ct$NH4) + up_c$NH4)
+ct_ph <- 1-(2*abs(ct$pH))/(abs(ct$pH) + up_c$pH)
+ct_om <- 1-(2*abs(ct$OM))/(abs(ct$OM) + up_c$OM)
+ct_ap <- 1-(2*abs(ct$AP))/(abs(ct$AP) + up_c$AP)
+ct_niao <- 1-(2*abs(ct$niaomei))/(abs(ct$niaomei) + up_c$niaomei)
+ct_zhe <- 1-(2*abs(ct$zhetang))/(abs(ct$zhetang) + up_c$zhetang)
+ct_yix <- 1-(2*abs(ct$yixianji))/(abs(ct$yixianji) + up_c$yixianji)
+ct_put <- 1-(2*abs(ct$putaotang))/(abs(ct$putaotang) + up_c$putaotang)
+ct_lin <- 1-(2*abs(ct$linsuan))/(abs(ct$linsuan) + up_c$linsuan)
+ct_function_rs <- cbind(ct_no3, ct_nh4, ct_ph, ct_om, ct_ap, ct_niao, ct_zhe, ct_yix, ct_put, ct_lin)
+ct_function_rs <- as.data.frame(ct_function_rs)
+
+
+cn_no3 <- 1-(2*abs(cn$NO3))/(abs(cn$NO3) + up_c$NO3)
+cn_nh4 <- 1-(2*abs(cn$NH4))/(abs(cn$NH4) + up_c$NH4)
+cn_ph <- 1-(2*abs(cn$pH))/(abs(cn$pH) + up_c$pH)
+cn_om <- 1-(2*abs(cn$OM))/(abs(cn$OM) + up_c$OM)
+cn_ap <- 1-(2*abs(cn$AP))/(abs(cn$AP) + up_c$AP)
+cn_niao <- 1-(2*abs(cn$niaomei))/(abs(cn$niaomei) + up_c$niaomei)
+cn_zhe <- 1-(2*abs(cn$zhetang))/(abs(cn$zhetang) + up_c$zhetang)
+cn_yix <- 1-(2*abs(cn$yixianji))/(abs(cn$yixianji) + up_c$yixianji)
+cn_put <- 1-(2*abs(cn$putaotang))/(abs(cn$putaotang) + up_c$putaotang)
+cn_lin <- 1-(2*abs(cn$linsuan))/(abs(cn$linsuan) + up_c$linsuan)
+cn_function_rs <- cbind(cn_no3, cn_nh4, cn_ph, cn_om, cn_ap, cn_niao, cn_zhe, cn_yix, cn_put, cn_lin)
+cn_function_rs <- as.data.frame(cn_function_rs)
+
+
+cm_no3 <- 1-(2*abs(cm$NO3))/(abs(cm$NO3) + up_c$NO3)
+cm_nh4 <- 1-(2*abs(cm$NH4))/(abs(cm$NH4) + up_c$NH4)
+cm_ph <- 1-(2*abs(cm$pH))/(abs(cm$pH) + up_c$pH)
+cm_om <- 1-(2*abs(cm$OM))/(abs(cm$OM) + up_c$OM)
+cm_ap <- 1-(2*abs(cm$AP))/(abs(cm$AP) + up_c$AP)
+cm_niao <- 1-(2*abs(cm$niaomei))/(abs(cm$niaomei) + up_c$niaomei)
+cm_zhe <- 1-(2*abs(cm$zhetang))/(abs(cm$zhetang) + up_c$zhetang)
+cm_yix <- 1-(2*abs(cm$yixianji))/(abs(cm$yixianji) + up_c$yixianji)
+cm_put <- 1-(2*abs(cm$putaotang))/(abs(cm$putaotang) + up_c$putaotang)
+cm_lin <- 1-(2*abs(cm$linsuan))/(abs(cm$linsuan) + up_c$linsuan)
+cm_function_rs <- cbind(cm_no3, cm_nh4, cm_ph, cm_om, cm_ap, cm_niao, cm_zhe, cm_yix, cm_put, cm_lin)
+cm_function_rs <- as.data.frame(cm_function_rs)
+
+up_function_rs <- cbind(ct_function_rs, cn_function_rs, cm_function_rs) %>% as.data.frame()
+write.csv(up_function_rs, file = "up_function_rs.csv")
+
+
+#### 3. calculate each function resistance in the subsoil
+up <- filter(soil,depth %in% "D")
+up_c <- filter(up,factor %in% "C")
+up_t <- filter(up,factor %in% "T")
+up_n <- filter(up,factor %in% "N")
+up_m <- filter(up,factor %in% "M")
+
+ct <- up_t[,5:15]-up_c[,5:15]
+cn <- up_n[,5:15]-up_c[,5:15]
+cm <- up_m[,5:15]-up_c[,5:15]
+
+ct_no3 <- 1-(2*abs(ct$NO3))/(abs(ct$NO3) + up_c$NO3)
+ct_nh4 <- 1-(2*abs(ct$NH4))/(abs(ct$NH4) + up_c$NH4)
+ct_ph <- 1-(2*abs(ct$pH))/(abs(ct$pH) + up_c$pH)
+ct_om <- 1-(2*abs(ct$OM))/(abs(ct$OM) + up_c$OM)
+ct_ap <- 1-(2*abs(ct$AP))/(abs(ct$AP) + up_c$AP)
+ct_niao <- 1-(2*abs(ct$niaomei))/(abs(ct$niaomei) + up_c$niaomei)
+ct_zhe <- 1-(2*abs(ct$zhetang))/(abs(ct$zhetang) + up_c$zhetang)
+ct_yix <- 1-(2*abs(ct$yixianji))/(abs(ct$yixianji) + up_c$yixianji)
+ct_put <- 1-(2*abs(ct$putaotang))/(abs(ct$putaotang) + up_c$putaotang)
+ct_lin <- 1-(2*abs(ct$linsuan))/(abs(ct$linsuan) + up_c$linsuan)
+ct_function_rs <- cbind(ct_no3, ct_nh4, ct_ph, ct_om, ct_ap, ct_niao, ct_zhe, ct_yix, ct_put, ct_lin)
+ct_function_rs <- as.data.frame(ct_function_rs)
+
+
+cn_no3 <- 1-(2*abs(cn$NO3))/(abs(cn$NO3) + up_c$NO3)
+cn_nh4 <- 1-(2*abs(cn$NH4))/(abs(cn$NH4) + up_c$NH4)
+cn_ph <- 1-(2*abs(cn$pH))/(abs(cn$pH) + up_c$pH)
+cn_om <- 1-(2*abs(cn$OM))/(abs(cn$OM) + up_c$OM)
+cn_ap <- 1-(2*abs(cn$AP))/(abs(cn$AP) + up_c$AP)
+cn_niao <- 1-(2*abs(cn$niaomei))/(abs(cn$niaomei) + up_c$niaomei)
+cn_zhe <- 1-(2*abs(cn$zhetang))/(abs(cn$zhetang) + up_c$zhetang)
+cn_yix <- 1-(2*abs(cn$yixianji))/(abs(cn$yixianji) + up_c$yixianji)
+cn_put <- 1-(2*abs(cn$putaotang))/(abs(cn$putaotang) + up_c$putaotang)
+cn_lin <- 1-(2*abs(cn$linsuan))/(abs(cn$linsuan) + up_c$linsuan)
+cn_function_rs <- cbind(cn_no3, cn_nh4, cn_ph, cn_om, cn_ap, cn_niao, cn_zhe, cn_yix, cn_put, cn_lin)
+cn_function_rs <- as.data.frame(cn_function_rs)
+
+
+cm_no3 <- 1-(2*abs(cm$NO3))/(abs(cm$NO3) + up_c$NO3)
+cm_nh4 <- 1-(2*abs(cm$NH4))/(abs(cm$NH4) + up_c$NH4)
+cm_ph <- 1-(2*abs(cm$pH))/(abs(cm$pH) + up_c$pH)
+cm_om <- 1-(2*abs(cm$OM))/(abs(cm$OM) + up_c$OM)
+cm_ap <- 1-(2*abs(cm$AP))/(abs(cm$AP) + up_c$AP)
+cm_niao <- 1-(2*abs(cm$niaomei))/(abs(cm$niaomei) + up_c$niaomei)
+cm_zhe <- 1-(2*abs(cm$zhetang))/(abs(cm$zhetang) + up_c$zhetang)
+cm_yix <- 1-(2*abs(cm$yixianji))/(abs(cm$yixianji) + up_c$yixianji)
+cm_put <- 1-(2*abs(cm$putaotang))/(abs(cm$putaotang) + up_c$putaotang)
+cm_lin <- 1-(2*abs(cm$linsuan))/(abs(cm$linsuan) + up_c$linsuan)
+cm_function_rs <- cbind(cm_no3, cm_nh4, cm_ph, cm_om, cm_ap, cm_niao, cm_zhe, cm_yix, cm_put, cm_lin)
+cm_function_rs <- as.data.frame(cm_function_rs)
+
+up_function_rs <- cbind(ct_function_rs, cn_function_rs, cm_function_rs) %>% as.data.frame()
+write.csv(up_function_rs, file = "do_function_rs.csv")
+
+
+#### 4. calculate soil multifuncations resistance
+up <- read.csv("up_function_rs.csv",row.names = 1)
+do <- read.csv("do_function_rs.csv",row.names = 1)
+
+up_t <- up[1:40,1:10]
+up_n <- up[1:40,11:20]
+up_m <- up[1:40,21:30]
+do_t <- do[1:40,1:10]
+do_n <- do[1:40,11:20]
+do_m <- do[1:40,21:30]
+
+up_t$depth <- "U"
+up_n$depth <- "U"
+up_m$depth <- "U"
+do_t$depth <- "D"
+do_n$depth <- "D"
+do_m$depth <- "D"
+
+standardizeUnitScale<-function(afun, min0=T, maxValue=max(afun, na.rm=T)){
+  if(min0 && min(afun, na.rm=T)<0) afun<-afun+abs(min(afun, na.rm=T))
+  afun/maxValue 
+}
+
+getStdAndMeanFunctions<-function(data, vars, standardizeFunction=standardizeUnitScale){
+  ret<-colwise(standardizeFunction)(data[,which(names(data) %in% vars)])
+  
+  names(ret)<-paste(names(ret), ".std", sep="")
+  ret$meanFunction<-rowSums(ret)/ncol(ret)
+  
+  return(ret)
+}
+
+## 8 multifuncations rs
+up_do_t <- rbind(up_t,do_t)
+up_do_t <- up_do_t[,-3:-4]
+ave_t <- cbind(up_do_t,getStdAndMeanFunctions(up_do_t, vars = c("ct_put","ct_zhe","ct_niao","ct_yix","ct_lin",
+                                                                "ct_nh4","ct_no3","ct_ap"))) 
+ave_t$depth <- rep(c("U","D"),each=40)
+
+up_do_n <- rbind(up_n,do_n)
+up_do_n <- up_do_n[,c(-3:-4)]
+ave_n <- cbind(up_do_n,getStdAndMeanFunctions(up_do_n, vars = c("cn_put","cn_zhe","cn_niao","cn_yix","cn_lin",
+                                                                "cn_nh4","cn_no3","cn_ap")))
+ave_n$depth <- rep(c("U","D"),each=40)                 
+
+up_do_m <- rbind(up_m,do_m)
+up_do_m <- up_do_m[,c(-3:-4)]
+ave_m <- cbind(up_do_m,getStdAndMeanFunctions(up_do_m, vars = c("cm_put","cm_zhe","cm_niao","cm_yix","cm_lin",
+                                                                "cm_nh4","cm_no3","cm_ap")))
+ave_m$depth <- rep(c("U","D"),each=40) 
+ave <- cbind(ave_t$meanFunction,ave_n$meanFunction,ave_m$meanFunction)
+colnames(ave) <- c("T","N","M")
+ave <- as.data.frame(ave)
+ave$depth <- rep(c("U","D"),each = 40) 
+write.csv(ave,file = "multifunctionality_rs_8functions.csv",row.names = FALSE)
