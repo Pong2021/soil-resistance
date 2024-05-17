@@ -1,5 +1,5 @@
 # soil-resistance
-Agricultural subsoils are less resistant to global change
+Code for research article titled "Agricultural subsoils are less resistant to global change".
 
 # Code
 Code named 'Diversity resistance'：how the resistance index of species diversity is calculated
