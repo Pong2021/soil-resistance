@@ -6,6 +6,8 @@ Code named 'Diversity resistance'：how the resistance index of species diversit
 
 Code named 'Community resistance'：how the resistance index of community structure is calculated
 
+Code named 'Function resistance'：how the resistance index of soil multifuntion is calculated
+
 Code named 'Network windows': how to generate networks by moving-window approach across 20 and 30 samples
 
 Code named 'Linking soil network ro ecological resistance': how the relationships between network complexity, negative associations and the resistance of diversity, community, and function
@@ -19,3 +21,5 @@ Data named 'asv_fungi2': Fungal ASV table, rownames is ASV name, colname is samp
 Data named 'asv_protist2': protistan ASV table, rownames is ASV name, colname is sample name 
 
 Data named 'sample change': factor file
+
+Data named 'soils': soil funtions file
