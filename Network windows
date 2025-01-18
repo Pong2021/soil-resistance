@@ -59,8 +59,8 @@ for (i in 1:61) {
   occor.p = occor$P 
   occor.r[abs(occor.r)<0.65]<-0
   occor.p<-p.adjust(occor.p,method="BH")  
-  occor.p[occor.p>=0.001]<-2  
-  occor.p[occor.p<0.001]<-1 
+  occor.p[occor.p>=0.05]<-2  
+  occor.p[occor.p<0.05]<-1 
   occor.p[occor.p>1]<-0
   
   igraph = graph_from_adjacency_matrix(occor.r,mode="undirected",weighted=TRUE,diag=FALSE)
